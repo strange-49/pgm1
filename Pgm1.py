@@ -1,53 +1,54 @@
-!pip install gensim
-from gensim.downloader import load
-
-
-model = load("glove-wiki-gigaword-50")
-
-print(model['king'])
-print(model['queen'])
-
-
-
-result = model.most_similar(
-    positive=['king', 'woman'],
-    negative=['man'],
-    topn=3
-)
-print(result)
-
-
-
-print("Vector for 'king':")
-print(model['king'])
-print("Vector length:", len(model['king']))
-
-
-
-sim1 = model.similarity('king', 'toy')
-sim2 = model.similarity('king', 'apple')
-
-print("Similarity(king, queen):", sim1)
-print("Similarity(king, apple):", sim2)
-
-print(result)
-
-model.most_similar(
-    positive=['doctor', 'woman'],
-    negative=['man'],
-    topn=5
-
-)
-
-
-
-result = model.most_similar(
-    positive=['king', 'woman'],
-    negative=['man'],
-    topn=5
-)
-
-for word, score in result:
-    print(word, score)
-
-
+import numpy as np 
+import pandas as pd
+import matplotlib.pyplot as plt 
+import seaborn as sns
+from sklearn.datasetsimport load_breast_cancer 
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler 
+from sklearn.decomposition import PCA
+from sklearn.metricsimport confusion_matrix, classification_report
+data = load_breast_cancer()
+X = data.data
+y = data.target
+scaler = StandardScaler() 
+X_scaled = scaler.fit_transform(X)
+kmeans = KMeans(n_clusters=2, random_state=42) 
+y_kmeans = kmeans.fit_predict(X_scaled)
+print("Confusion Matrix:") 
+print(confusion_matrix(y, y_kmeans)) 
+print("\nClassification Report:") 
+print(classification_report(y, y_kmeans))
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+df = pd.DataFrame(X_pca, columns=['PC1', 'PC2']) 
+df['Cluster'] = y_kmeans
+df['True Label'] = y
+plt.figure(figsize=(8, 6))
+sns.scatterplot(data=df, x='PC1', y='PC2', hue='Cluster', palette='Set1', s=100, edgecolor='black',
+alpha=0.7)
+plt.title('K-Means Clustering of Breast Cancer Dataset') 
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2') 
+plt.legend(title="Cluster") 
+plt.savefig('ep101.png')
+plt.show()
+plt.figure(figsize=(8, 6))
+sns.scatterplot(data=df, x='PC1', y='PC2', hue='True Label', palette='coolwarm', s=100, 
+edgecolor='black', alpha=0.7)
+plt.title('True Labels of Breast Cancer Dataset') 
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2') 
+plt.legend(title="True Label") 
+plt.savefig('ep102.png')
+plt.show()
+plt.figure(figsize=(8, 6))
+sns.scatterplot(data=df, x='PC1', y='PC2', hue='Cluster', palette='Set1', s=100, edgecolor='black', 
+alpha=0.7)
+centers = pca.transform(kmeans.cluster_centers_)
+plt.scatter(centers[:, 0], centers[:, 1], s=200, c='red', marker='X', label='Centroids') 
+plt.title('K-Means Clustering with Centroids')
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2') 
+plt.legend(title="Cluster") 
+plt.savefig('ep103.png')
+plt.show()
